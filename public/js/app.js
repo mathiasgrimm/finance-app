@@ -2287,7 +2287,6 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     this.getTransactions();
   },
-  computed: {},
   methods: {
     getTransactions: function getTransactions(page) {
       var _this = this;
@@ -2313,8 +2312,7 @@ __webpack_require__.r(__webpack_exports__);
           groupedTransactions[date].push(transaction);
         });
         _this.groupedTransactions = groupedTransactions;
-        _this.totalBalance = res.data.total_balance; // this.totalBalance = 1725.00;
-
+        _this.totalBalance = res.data.total_balance;
         _this.totalPerDate = res.data.total_per_date;
       })["catch"](function (err) {
         // TODO
@@ -2323,8 +2321,11 @@ __webpack_require__.r(__webpack_exports__);
         _this.isLoading = false;
       });
     },
+    // TODO this whole method should be refactored
     formatAmount: function formatAmount(totalBalance, part, includeSign) {
-      var total = Math.abs(totalBalance.toFixed(2));
+      var total = Math.abs(totalBalance.toFixed(2)); // TODO this is a good candidate for rafactor - this should be extracted from this component
+      // add commas to the amount
+
       total = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       var parts = total.split('.');
       var formatted = '';

@@ -21,6 +21,8 @@ class Transaction extends JsonResource
             'id' => $this->id,
             'label' => $this->label,
             'amount' => $this->amount,
+
+            // this is to make it compatible with the default html date picker
             'transaction_at' => str_replace('Z', '', $transactionAt->toIso8601ZuluString()),
             'user_id' => $this->user_id
         ];

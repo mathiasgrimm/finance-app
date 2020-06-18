@@ -163,10 +163,6 @@
             this.getTransactions();
         },
 
-        computed: {
-
-        },
-
         methods: {
             getTransactions(page) {
                 if (!page) {
@@ -193,7 +189,6 @@
 
                     this.groupedTransactions = groupedTransactions;
                     this.totalBalance = res.data.total_balance;
-                    // this.totalBalance = 1725.00;
                     this.totalPerDate = res.data.total_per_date;
                 }).catch(err => {
                     // TODO
@@ -203,8 +198,12 @@
                 })
             },
 
+            // TODO this whole method should be refactored
             formatAmount(totalBalance, part, includeSign) {
                 let total = Math.abs(totalBalance.toFixed(2));
+
+                // TODO this is a good candidate for rafactor - this should be extracted from this component
+                // add commas to the amount
                 total = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
                 let parts = total.split('.');
