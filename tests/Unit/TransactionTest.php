@@ -38,8 +38,13 @@ class TransactionTest extends TestCase
             'transaction_at' => '2000-01-02 10:11:12'
         ]);
 
-        $this->assertEquals(60, (Transaction::totalsForUserAndDate($user->id, '2000-01-01'))['2000-01-01']);
-        $this->assertEquals(-1, (Transaction::totalsForUserAndDate($user->id, '2000-01-02'))['2000-01-02']);
+        $totals = Transaction::totalsForUserAndDate($user->id, '2000-01-01', '2000-01-01');
+        $this->assertCount(1, $totals);
+        $this->assertEquals(60, $totals['2000-01-01']);
+
+        $totals = Transaction::totalsForUserAndDate($user->id, '2000-01-02', '2000-01-02');
+        $this->assertCount(1, $totals);
+        $this->assertEquals(-1, $totals['2000-01-02']);
     }
 
     public function test_totals_for_user_and_date_range()
