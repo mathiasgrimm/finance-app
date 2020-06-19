@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-// TODO
+// TODO fix when auth is implemented
 // ensuring the first user is always logged in
 if (!app()->environment('testing')) {
     if ($user = \App\User::first()) {
