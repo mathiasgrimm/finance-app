@@ -23,6 +23,12 @@ class CreateTransactionsTable extends Migration
 
             $table->index(['transaction_at', 'user_id']);
         });
+
+        if (\DB::getDriverName() == 'mysql') {
+            \DB::unprepared('
+                alter table transactions add index transactions_date_transaction_at_user_id((date(transaction_at)), user_id)
+            ');
+        }
     }
 
     /**
