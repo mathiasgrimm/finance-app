@@ -52,11 +52,12 @@ class Transaction extends Model
             ->when($dateEnd, function ($query, $dateEnd) {
                 $query->where('transaction_at', '<=', $dateEnd);
             })
+            ->orderBy('date', 'desc')
             ->groupBy(\DB::raw('date(transaction_at)'))
             ->get()
             ->keyBy('date')
             // making sure the array will be only '2000-01-01 => $total without the other values if any
-            ->map(fn($item) => $item->total);
+            ->map(fn($item) => (float) $item->total);
 
         return $total;
     }
