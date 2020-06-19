@@ -47,16 +47,13 @@ class UserTransactionsCollection extends ResourceCollection
 
     private function includeTotalPerDate($userId)
     {
-        $totalsPerDate = [];
-
+        // grouping by dates and sorting so that we can get the first and the last date
+        // to pass a date range
         $dates = $this->collection->groupBy(function ($transaction) {
             return $transaction->transaction_at->toDateString();
-        })->keys();
+        })->keys()->sort();
 
-        foreach ($dates as $date) {
-            $totalsPerDate[$date] = Transaction::totalsForUserAndDate($userId, $date);
-        }
-
+        $totalsPerDate = Transaction::totalsForUserAndDate($userId, $dates->first(), $dates->last());
         return $totalsPerDate;
     }
 
