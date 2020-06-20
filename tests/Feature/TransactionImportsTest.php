@@ -2,13 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Jobs\ProcessCsvImport;
 use App\Transaction;
 use App\TransactionImport;
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\Fakes\CsvContentFake;
 use Tests\TestCase;
