@@ -36,6 +36,7 @@ class TransactionImportsTest extends TestCase
         ]);
 
         $response->assertOk();
+        $this->assertEquals(['data' => ['records' => 3]], $response->decodeResponseJson());
 
         $this->assertCount(1, $cloudFiles = Storage::cloud()->allFiles());
         $this->assertDatabaseHas('transaction_imports', [
