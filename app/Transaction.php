@@ -4,6 +4,7 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Transaction extends Model
 {
@@ -28,16 +29,35 @@ class Transaction extends Model
         ], $merge);
     }
 
-    public static function totalsForUserAndDate($userId, $date)
+    /**
+     * returns a key/value pair array with the key being the ISO date
+     * e.g. 2000-12-31 and value being the total e.g. 123.29
+     *
+     * @param $userId
+     * @param null $dateStart
+     * @param null $dateEnd
+     * @return array|Collection
+     * @throws \Exception
+     */
+    public static function totalsForUserAndDate($userId, $dateStart = null, $dateEnd = null)
     {
-        $startDate = (new Carbon($date))->setTime(0, 0, 0);
-        $endDate = (new Carbon($date))->setTime(23, 59, 59);
+        $dateStart = $dateStart ? (new Carbon($dateStart))->setTime(0, 0, 0) : null;
+        $dateEnd = $dateEnd ? (new Carbon($dateEnd))->setTime(23, 59, 59) : null;
 
-        // not casting so that it used the index
-        $total = (float) Transaction::where('user_id', $userId)
-            ->where('transaction_at', '>=', $startDate)
-            ->where('transaction_at', '<=', $endDate)
-            ->sum('amount');
+        $total = Transaction::selectRaw(\DB::raw('sum(amount) as total, date(transaction_at) as date'))
+            ->where('user_id', $userId)
+            ->when($dateStart, function ($query, $dateStart) {
+                $query->where('transaction_at', '>=', $dateStart);
+            })
+            ->when($dateEnd, function ($query, $dateEnd) {
+                $query->where('transaction_at', '<=', $dateEnd);
+            })
+            ->orderBy('date', 'desc')
+            ->groupBy(\DB::raw('date(transaction_at)'))
+            ->get()
+            ->keyBy('date')
+            // making sure the array will be only '2000-01-01 => $total without the other values if any
+            ->map(fn($item) => (float) $item->total);
 
         return $total;
     }
