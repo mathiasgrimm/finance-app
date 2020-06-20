@@ -33,6 +33,11 @@ Route::group(['prefix' => '/api'], function () {
         Route::get('/transactions', 'TransactionsController@index');
         Route::post('/transactions', 'TransactionsController@store');
         Route::get('/balance', 'UsersController@balance');
+
+        Route::group(['prefix' => '/transaction-imports'], function () {
+            Route::post('/', 'TransactionImportsController@store');
+        });
+
     });
 
     Route::delete('/transactions/{transaction}', 'TransactionsController@destroy');
