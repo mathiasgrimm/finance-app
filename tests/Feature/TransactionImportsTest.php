@@ -26,8 +26,7 @@ class TransactionImportsTest extends TestCase
     public function test_it_uploads_file_and_dispatchs_job()
     {
         $user = factory(User::class)->create();
-        $this->actingAs($user);
-
+        
         $response = $this->json('POST', $this->baseUri, [
             'transactions' => UploadedFile::fake()->createWithContent('file.csv', CsvContentFake::getContent()),
         ]);
