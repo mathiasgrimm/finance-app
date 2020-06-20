@@ -17,6 +17,8 @@ class ProcessCsvImport implements ShouldQueue
 
     private $importer;
 
+    protected $tries = 1;
+
     /**
      * Create a new job instance.
      *
@@ -34,13 +36,11 @@ class ProcessCsvImport implements ShouldQueue
      */
     public function handle(TransactionImport $transactionImport)
     {
-        try {
+       try {
             $this->importer->import($transactionImport);
         } catch (\Exception $e) {
-            // should not try to re-import the file if there is a validation exception
-            if (!is_a($e, ValidationException::class)) {
-                throw $e;
-            }
+           $transactionImport->update(['failed_at' => now()]);
+           \Log::error("failed to import TransactionImport #{$transactionImport->id} with error: {$e->getMessage()}");
         }
     }
 }
