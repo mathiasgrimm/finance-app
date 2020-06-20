@@ -31,17 +31,12 @@ class Importer
             $transactionImport = TransactionImport::findOrFail($transactionImport);
         }
 
-        try {
-            $records = $this->getRecords($transactionImport);
-            $this->validateRecords($records);
+        $records = $this->getRecords($transactionImport);
+        $this->validateRecords($records);
 
-            DB::transaction(function () use ($transactionImport, $records) {
-                $this->importRecords($transactionImport, $records);
-            });
-        } catch (ValidationException $e) {
-            $transactionImport->update(['failed_at' => now()]);
-            throw $e;
-        }
+        DB::transaction(function () use ($transactionImport, $records) {
+            $this->importRecords($transactionImport, $records);
+        });
     }
 
     /**

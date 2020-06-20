@@ -100,6 +100,5 @@ CSV;
         }
 
         $this->assertEquals(ValidationException::class, get_class($e));
-
     }
 }
