@@ -15,7 +15,6 @@ class AlterTransactionsTablesAddImportColumns extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->unsignedBigInteger('transaction_import_id')->nullable()->after('id');
-            $table->boolean('is_importing')->nullable()->after('transaction_import_id');
 
             $table->foreign('transaction_import_id')->references('id')->on('transaction_imports');
         });
@@ -30,7 +29,7 @@ class AlterTransactionsTablesAddImportColumns extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->dropForeign(['transaction_import_id']);
-            $table->dropColumn('is_importing');
+            $table->dropColumn('transaction_import_id');
         });
     }
 }
