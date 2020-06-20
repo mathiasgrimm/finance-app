@@ -17,6 +17,12 @@ class ProcessCsvImport implements ShouldQueue
 
     public $transactionImport;
 
+    /**
+     * this job should not retry as it introduces some additional complexities in terms of
+     * determining whether the user's dashboard should be locked or not
+     *
+     * @var int
+     */
     protected $tries = 1;
 
     /**
@@ -37,12 +43,13 @@ class ProcessCsvImport implements ShouldQueue
     public function handle(Importer $importer)
     {
        try {
-            $this->importer->import($this->transactionImport);
-        } catch (\Exception $e) {
+           $importer->import($this->transactionImport);
+           $this->transactionImport->update(['finished_at' => now()]);
+       } catch (\Exception $e) {
            $this->transactionImport->update(['failed_at' => now()]);
            \Log::error(
                "failed to import TransactionImport #{$this->transactionImport->id} with error: {$e->getMessage()}"
            );
-        }
+       }
     }
 }
