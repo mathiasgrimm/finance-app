@@ -23,7 +23,6 @@ class TransactionImportsTest extends TestCase
     {
         parent::setUp();
         Storage::fake();
-        Queue::fake();
     }
 
     public function test_it_uploads_file_and_dispatchs_job()
@@ -45,9 +44,10 @@ class TransactionImportsTest extends TestCase
         ]);
 
         $transactionImport = TransactionImport::first();
+        $transactions = Transaction::where('transaction_import_id', $transactionImport->id)->get();
+        $this->assertCount(3, $transactions);
 
-        Queue::assertPushed(function (ProcessCsvImport $job) use ($transactionImport) {
-            return $job->transactionImport->id === $transactionImport->id;
-        });
+        $this->assertNotNull($transactionImport->finished_at);
+        $this->assertNull($transactionImport->failed_at);
     }
 }
