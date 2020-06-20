@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Tests\Fakes\CsvContentFake;
 use Tests\TestCase;
 
 class TransactionImportsTest extends TestCase
@@ -25,23 +26,13 @@ class TransactionImportsTest extends TestCase
         Queue::fake();
     }
 
-    private function fileContent()
-    {
-        return <<<CSV
-Label,Value,Date
-"Car Insurance",-185.15,"2016-01-16 18:02:17"
-"Groceries",-69.52,"1986-07-20 04:17:58"
-"Rent",-148.91,"1975-07-25 11:02:59"
-CSV;
-    }
-
     public function test_it_uploads_file_and_dispatchs_job()
     {
         $user = factory(User::class)->create();
         $this->actingAs($user);
 
         $response = $this->json('POST', $this->baseUri, [
-            'transactions' => UploadedFile::fake()->createWithContent('file.csv', $this->fileContent()),
+            'transactions' => UploadedFile::fake()->createWithContent('file.csv', CsvContentFake::getContent()),
         ]);
 
         $response->assertOk();

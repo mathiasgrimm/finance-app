@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\ValidationException;
+use Tests\Fakes\CsvContentFake;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,16 +28,6 @@ class CsvImporterTest extends TestCase
         return new Importer();
     }
 
-    private function fileContent()
-    {
-        return <<<CSV
-Label,Value,Date
-"Car Insurance",-185.15,"2016-01-16 18:02:17"
-"Groceries",-69.52,"1986-07-20 04:17:58"
-"Rent",-148.91,"1975-07-25 11:02:59"
-CSV;
-    }
-
     public function test_it_imports_csv()
     {
         $user = factory(User::class)->create();
@@ -46,7 +37,7 @@ CSV;
             'file_path' => 'file.csv',
         ]);
 
-        Storage::put('file.csv', $this->fileContent());
+        Storage::put('file.csv', CsvContentFake::getContent());
 
         $importer = $this->getImporter();
         $importer->import($transactionImport);
