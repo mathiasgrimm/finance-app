@@ -19,7 +19,7 @@ class CsvImporterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('local');
+         Storage::fake();
     }
 
     private function getImporter()
@@ -87,7 +87,7 @@ CSV;
             'file_path' => 'file.csv',
         ]);
 
-        Storage::put('file.csv', $csv);
+        Storage::cloud()->put('file.csv', $csv);
 
         $importer = $this->getImporter();
 
