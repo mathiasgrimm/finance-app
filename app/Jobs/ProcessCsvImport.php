@@ -15,7 +15,7 @@ class ProcessCsvImport implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $importer;
+    public $transactionImport;
 
     protected $tries = 1;
 
@@ -24,9 +24,9 @@ class ProcessCsvImport implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Importer $importer)
+    public function __construct(TransactionImport $transactionImport)
     {
-        $this->importer = $importer;
+        $this->transactionImport = $transactionImport;
     }
 
     /**
@@ -34,13 +34,15 @@ class ProcessCsvImport implements ShouldQueue
      *
      * @return void
      */
-    public function handle(TransactionImport $transactionImport)
+    public function handle(Importer $importer)
     {
        try {
-            $this->importer->import($transactionImport);
+            $this->importer->import($this->transactionImport);
         } catch (\Exception $e) {
-           $transactionImport->update(['failed_at' => now()]);
-           \Log::error("failed to import TransactionImport #{$transactionImport->id} with error: {$e->getMessage()}");
+           $this->transactionImport->update(['failed_at' => now()]);
+           \Log::error(
+               "failed to import TransactionImport #{$this->transactionImport->id} with error: {$e->getMessage()}"
+           );
         }
     }
 }
