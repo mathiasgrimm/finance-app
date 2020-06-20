@@ -23,10 +23,7 @@ class Transaction extends Model
 
     protected static function booted()
     {
-        static::addGlobalScope('notBeingImported', function (Builder $builder) {
-            $builder->whereNull('is_importing')
-                ->orWhere('is_importing', 0);
-        });
+        //
     }
 
     public static function rules($transaction = null, $merge = [])
