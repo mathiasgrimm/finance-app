@@ -19,7 +19,7 @@ class TransactionImportsController extends Controller
 
         $file = request()->file('transactions');
 
-        $fileName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+        $fileName = $file->getClientOriginalName();
         $filePath = "users/{$user->id}/transactions/" . time() . "_{$fileName}";
 
         try {
