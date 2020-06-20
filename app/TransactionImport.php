@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransactionImport extends Model
 {
-    //
+    protected $guarded = [];
 }
