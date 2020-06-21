@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserTransactionsCollection;
 use App\Transaction;
+use App\TransactionImport;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -44,6 +45,10 @@ class TransactionsController extends Controller
      */
     public function store(Request $request, User $user)
     {
+        if (TransactionImport::currentlyImporting($user)) {
+            abort(422, 'user already importing a file');
+        }
+
         $this->validate($request, Transaction::rules());
 
         Transaction::create([
