@@ -20,7 +20,7 @@ class CsvImporterTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-         Storage::fake();
+        Storage::fake();
     }
 
     private function getImporter()
@@ -86,7 +86,7 @@ CSV;
             $e = null;
             $importer->import($transactionImport);
             $this->fail('should throw ');
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             //
         }
 
