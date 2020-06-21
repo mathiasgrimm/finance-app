@@ -18,6 +18,7 @@
 <body class="bg-gray-100 h-screen antialiased leading-none">
     <div id="app">
 
+
         {{-- TODO move this to a nav vue component        --}}
         <nav class="h-16 flex items-center justify-between bg-white">
             <div class="flex ml-8 justify-center items-center">
@@ -27,14 +28,26 @@
                 </span>
             </div>
 
-            <div class="mr-8 flex items-center justify-between">
-                <img src="{{ asset('/img/alarm.svg') }}">
-                <img class="h-6 ml-4" src="{{ asset('/img/avatar.png') }}">
-                <span class="ml-4 text-gray-600 font-bold text-xs">Molly Green<span>
-            </div>
+            @auth()
+                <div class="mr-8 flex items-center justify-between">
+                    <img src="{{ asset('/img/alarm.svg') }}">
+                    <img class="h-6 ml-4" src="{{ asset('/img/avatar.png') }}">
+                    <span class="ml-4 text-gray-600 font-bold text-xs">Molly Green<span>
+                </div>
+            @endauth()
         </nav>
 
-        @yield('content')
+        @auth()
+            @yield('content')
+        @endauth()
+
+        @guest()
+            <div class="pt-24">
+                @yield('content')
+            </div>
+        @endauth()
+
+        <portal-target name="modals"></portal-target>
     </div>
 </body>
 </html>
