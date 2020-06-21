@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TransactionImportsUpdated;
 use App\Jobs\ProcessCsvImport;
 use App\Transaction;
 use App\TransactionImport;
@@ -11,8 +12,33 @@ use Illuminate\Support\Facades\Storage;
 
 class TransactionImportsController extends Controller
 {
+    public function importing(User $user)
+    {
+        $transactionImport = TransactionImport::currentlyImporting($user);
+
+        if ($transactionImport) {
+            return [
+                'data' => [
+                    'importing' => true,
+                    'transaction_import' => $transactionImport->toArray(),
+                ]
+            ];
+        } else {
+            return [
+                'data' => [
+                    'importing' => false,
+                    'transaction_import' => null,
+                ]
+            ];
+        }
+    }
+
     public function store(User $user)
     {
+        if (TransactionImport::currentlyImporting($user)) {
+            abort(422, 'user already importing a file');
+        }
+
         $this->validate(request(), [
             'transactions' => 'required|file',
         ]);
@@ -29,10 +55,13 @@ class TransactionImportsController extends Controller
                 'file_name' => $fileName,
             ]);
 
-            $records = count(file($file->path())) -1;
-
             $fp = fopen($file->path(), 'r');
             Storage::cloud()->putStream($filePath, $fp);
+
+            $records = count(file($file->path())) -1;
+
+            $transactionImport->update(['total_records' => $records]);
+
             ProcessCsvImport::dispatch($transactionImport);
 
             return [
@@ -42,7 +71,12 @@ class TransactionImportsController extends Controller
             ];
         } catch (\Exception $e) {
             if (isset($transactionImport)) {
-                $transactionImport->update('failed_at', now());
+                $transactionImport->update([
+                    'failed_at' => now(),
+                    'finished_at' => now(),
+                ]);
+
+                event(new TransactionImportsUpdated($transactionImport));
             }
         } finally {
             fclose($fp);
