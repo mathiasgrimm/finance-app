@@ -18,6 +18,7 @@ class CreateTransactionImportsTable extends Migration
             $table->foreignId('user_id')->constrained();
             $table->string('file_path')->unique();
             $table->string('file_name');
+            $table->unsignedInteger('total_records')->nullable();
             $table->dateTime('failed_at')->nullable();
             $table->dateTime('finished_at')->nullable();
             $table->timestamps();
