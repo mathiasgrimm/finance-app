@@ -2,13 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-// TODO fix when auth is implemented
-// ensuring the first user is always logged in
-if (!app()->environment('testing')) {
-    if ($user = \App\User::first()) {
-        auth()->loginUsingId($user->id);
-    }
-}
+Auth::routes();
 
 /*
 |--------------------------------------------------------------------------
@@ -22,28 +16,10 @@ if (!app()->environment('testing')) {
 */
 
 Route::get('/', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
     // TODO should do a full spa
     return view('users.balance');
 });
-
-// TODO just for convenience
-Route::group(['prefix' => '/api'], function () {
-    Route::group(['prefix' => '/users/{user}'], function() {
-        Route::get('/transactions/total-by-date', 'TransactionsController@totalByDate');
-        Route::get('/transactions', 'TransactionsController@index');
-        Route::post('/transactions', 'TransactionsController@store');
-        Route::get('/balance', 'UsersController@balance');
-
-        Route::group(['prefix' => '/transaction-imports'], function () {
-            Route::post('/', 'TransactionImportsController@store');
-        });
-
-    });
-
-    Route::delete('/transactions/{transaction}', 'TransactionsController@destroy');
-    Route::put('/transactions/{transaction}', 'TransactionsController@update');
-
-});
-
-Auth::routes();
-
