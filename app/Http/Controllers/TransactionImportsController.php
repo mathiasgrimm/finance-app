@@ -16,21 +16,12 @@ class TransactionImportsController extends Controller
     {
         $transactionImport = TransactionImport::currentlyImporting($user);
 
-        if ($transactionImport) {
-            return [
-                'data' => [
-                    'importing' => true,
-                    'transaction_import' => $transactionImport->toArray(),
-                ]
-            ];
-        } else {
-            return [
-                'data' => [
-                    'importing' => false,
-                    'transaction_import' => null,
-                ]
-            ];
-        }
+        return [
+            'data' => [
+                'importing' => (bool) $transactionImport,
+                'transaction_import' => optional($transactionImport)->toArray(),
+            ]
+        ];
     }
 
     public function store(User $user)
