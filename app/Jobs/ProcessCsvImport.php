@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\TransactionImportsUpdated;
 use App\Services\CsvImporter\Importer;
 use App\TransactionImport;
 use Illuminate\Bus\Queueable;
@@ -41,14 +42,22 @@ class ProcessCsvImport implements ShouldQueue
      */
     public function handle(Importer $importer)
     {
-       try {
-           $importer->import($this->transactionImport);
-           $this->transactionImport->update(['finished_at' => now()]);
-       } catch (\Exception $e) {
-           $this->transactionImport->update(['failed_at' => now()]);
-           \Log::error(
-               "failed to import TransactionImport #{$this->transactionImport->id} with error: {$e->getMessage()}"
-           );
-       }
+        event(new TransactionImportsUpdated($this->transactionImport));
+        // sleep(15);
+
+        try {
+            $importer->import($this->transactionImport);
+            $this->transactionImport->update(['finished_at' => now()]);
+        } catch (\Exception $e) {
+            $this->transactionImport->update([
+                'failed_at' => now(),
+                'finished_at' => now(),
+            ]);
+            \Log::error(
+                "failed to import TransactionImport #{$this->transactionImport->id} with error: {$e->getMessage()}"
+            );
+        }
+
+        event(new TransactionImportsUpdated($this->transactionImport));
     }
 }
