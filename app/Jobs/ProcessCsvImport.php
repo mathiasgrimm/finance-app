@@ -42,8 +42,8 @@ class ProcessCsvImport implements ShouldQueue
      */
     public function handle(Importer $importer)
     {
-        event(new TransactionImportsUpdated($this->transactionImport));
-        // sleep(15);
+        event(new TransactionImportsUpdated($this->transactionImport->user_id));
+        sleep(15);
 
         try {
             $importer->import($this->transactionImport);
@@ -58,6 +58,6 @@ class ProcessCsvImport implements ShouldQueue
             );
         }
 
-        event(new TransactionImportsUpdated($this->transactionImport));
+        event(new TransactionImportsUpdated($this->transactionImport->user_id));
     }
 }
