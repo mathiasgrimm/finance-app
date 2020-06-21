@@ -15,16 +15,16 @@ class TransactionImportsUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $transactionImport;
+    public $userId;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(TransactionImport $transactionImport)
+    public function __construct($userId)
     {
-        $this->transactionImport = $transactionImport;
+        $this->userId = $userId;
     }
 
     /**
@@ -34,6 +34,6 @@ class TransactionImportsUpdated implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel("users.{$this->transactionImport->user_id}.transactionImports");
+        return new PrivateChannel("users.{$this->userId}.transactionImports");
     }
 }
