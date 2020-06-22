@@ -4,6 +4,10 @@ This is a finance app build using Laravel 7 + Vue.js + Tailwind CSS
 The user should be able to Add, Edit, Delete and Import transactions.
 
 
+## Instalation
+This app is currently working with Laravel Echo with the Pusher driver which means you need to 
+use your pusher api keys to have it working 100%.
+
 ## API Endpoints
 ```
 GET /api/users/{user}/transactions/total-by-date?date=2020-06-17
@@ -123,5 +127,48 @@ Expects:
   "label": "some label",
   "transaction_at": "2000-01-01 20:00:00",
   "amount": 100.99
+}
+```
+
+```
+GET /api/users/{user}/transaction-imports/importing
+```
+Checks whether a user is currently importing a balance file or not
+
+Returns:
+```
+{
+  "data": {
+    "importing": true,
+    "transaction_import": {
+      "id": 43,
+      "user_id": 1,
+      "file_path": "users/1/transactions/1592790834_5000-balance-entries.csv",
+      "file_name": "5000-balance-entries.csv",
+      "total_records": 5000,
+      "failed_at": null,
+      "finished_at": null,
+      "created_at": "2020-06-22T01:53:54.000000Z",
+      "updated_at": "2020-06-22T01:54:08.000000Z"
+    }
+  }
+}
+```
+
+---
+
+```
+POST /api/users/{user}/transaction-imports
+```
+Imports a new CSV balance file
+
+Expects a file called `transactions`
+and return the total number of records for that file
+
+```
+{
+  "data": {
+    "records": 5000
+  }
 }
 ```

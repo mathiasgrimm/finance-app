@@ -5,13 +5,14 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class Transaction extends Model
 {
     protected $guarded = [];
 
     protected $casts = [
-        'amount' => 'float'
+        'amount' => 'float',
     ];
 
     protected $dates = [
@@ -19,6 +20,11 @@ class Transaction extends Model
         'update_at',
         'transaction_at',
     ];
+
+    protected static function booted()
+    {
+        //
+    }
 
     public static function rules($transaction = null, $merge = [])
     {

@@ -21,6 +21,7 @@ window.Vue = require('vue');
 
 Vue.component('user-balance', require('./components/UserBalance.vue').default);
 Vue.component('add-transaction-modal', require('./components/AddTransactionModal').default);
+Vue.component('import-transaction-modal', require('./components/ImportTransactionsModal').default);
 Vue.component('edit-transaction', require('./components/EditTransaction').default);
 
 /**
@@ -34,6 +35,9 @@ Vue.mixin({
         moment: window.moment,
     }
 })
+
+import PortalVue from 'portal-vue'
+Vue.use(PortalVue)
 
 const app = new Vue({
     el: '#app',

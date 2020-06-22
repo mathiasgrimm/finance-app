@@ -10,12 +10,19 @@
 
                         <button
                             class="h-8 ml-4 inline-flex text-xs bg-primary hover:bg-blue-800 text-white font-bold py-2 px-3 rounded items-center"
+                            :disabled="importingInProgress"
+                            :class="importingInProgress ? 'cursor-not-allowed': ''"
                             @click="showingAddTransactionModal = !showingAddTransactionModal"
                         >
                             <img class="object-contain w-3" src="/img/add.svg"><span class="ml-1">ADD ENTRY</span>
                         </button>
 
-                        <button class="h-8 ml-4 overflow-hidden inline-flex text-xs bg-primary hover:bg-blue-800 text-white font-bold py-3 px-3 rounded items-center">
+                        <button
+                            class="h-8 ml-4 overflow-hidden inline-flex text-xs bg-primary hover:bg-blue-800 text-white font-bold py-3 px-3 rounded items-center"
+                            :disabled="importingInProgress"
+                            :class="importingInProgress ? 'cursor-not-allowed': ''"
+                            @click="showingImportTransactionsModal = !showingImportTransactionsModal"
+                        >
                             <img class="object-contain w-6 -ml-2" src="/img/import.svg"><span class="">IMPORT CSV</span>
                         </button>
                     </div>
@@ -32,11 +39,27 @@
 
             <!-- Page Content -->
             <div class="container max-w-3xl mx-auto mt-10 mb-16">
+                <div
+                    v-if="importingInProgress"
+                    class="py-4 bg-orange-600 opacity-75 text-white text-center font-semibold rounded-lg"
+                >
+                    <img class="h-4 w-4 inline-block" src="/img/loading.svg">
+                    <span class="ml-2">We're importing {{ stImportingRecordsCount }} balance entries. Sit tight</span>
+                    <!--
+                        - would be nice to actually display a different message when the import is complete and allow
+                          the user to manually refresh, otherwise he might lose some edit's he is doing
+                        - here we could also display a progress while processing as in processing 1 of 10,000
+                    -->
+                </div>
+
                 <div v-if="isLoading">
                     loading...
                 </div>
 
-                <div v-if="groupedTransactions && Object.keys(groupedTransactions).length < 1">
+                <div
+                    v-if="groupedTransactions && Object.keys(groupedTransactions).length < 1"
+                    class="text-red-500 text-center font-semibold rounded-lg"
+                >
                     no transactions found
                 </div>
 
@@ -120,12 +143,23 @@
             </div>
         </div>
 
-        <add-transaction-modal
-            v-model="showingAddTransactionModal"
-            :user-id="userId"
-            @cancel="showingAddTransactionModal = false"
-            @success="transactionAdded"
-        />
+        <portal to="modals" v-if="showingAddTransactionModal">
+            <add-transaction-modal
+                :show="showingAddTransactionModal"
+                :user-id="userId"
+                @close="showingAddTransactionModal = false"
+                @success="transactionAdded"
+            />
+        </portal>
+
+        <portal to="modals" v-if="showingImportTransactionsModal">
+            <import-transaction-modal
+                :show="showingImportTransactionsModal"
+                :user-id="userId"
+                @close="showingImportTransactionsModal = false"
+                @importing="importingTransactions"
+            />
+        </portal>
     </div>
 
 </template>
@@ -133,11 +167,15 @@
 <script>
     import AddTransactionModal from "./AddTransactionModal";
     import EditTransaction from "./EditTransaction";
+    import ImportTransactionsModal from "./ImportTransactionsModal";
+
+    import utils from '../utils'
 
     export default {
         components: {
             AddTransactionModal,
             EditTransaction,
+            ImportTransactionsModal
         },
 
         props: {
@@ -148,6 +186,9 @@
 
         data() {
             return {
+                importingInProgress: false,
+                importingRecordsCount: null,
+                showingImportTransactionsModal: false,
                 showingAddTransactionModal: false,
                 groupedTransactions: null,
                 totalBalance: 0.00,
@@ -159,11 +200,43 @@
             }
         },
 
-        mounted() {
+        async beforeMount() {
+            let data = await this.getCurrentlyImporting();
+            if (data.importing) {
+                this.importingTransactions(data.transaction_import.total_records);
+            }
+        },
+
+        computed: {
+            stImportingRecordsCount: function () {
+                return utils.numberFormat(this.importingRecordsCount);
+            }
+        },
+
+        async mounted() {
+            Echo.private(`users.${this.userId}.transactionImports`).listen('TransactionImportsUpdated', async (e) => {
+                console.log(e);
+
+                // sometimes the event is delayed so we need to check the current status at the time
+                // we receive the event
+                let data = await this.getCurrentlyImporting();
+                if (data.importing) {
+                    this.importingTransactions(data.transaction_import.total_records);
+                } else {
+                    this.importingTransactions(null, false);
+                    this.getTransactions();
+                }
+            });
+
             this.getTransactions();
         },
 
         methods: {
+            async getCurrentlyImporting() {
+                const {data} = await axios.get(`users/${this.userId}/transaction-imports/importing`);
+                return data.data;
+            },
+
             getTransactions(page) {
                 if (!page) {
                     page = 1;
@@ -202,9 +275,9 @@
             formatAmount(totalBalance, part, includeSign) {
                 let total = Math.abs(totalBalance.toFixed(2));
 
-                // TODO this is a good candidate for rafactor - this should be extracted from this component
+                // TODO this is a good candidate for refactor - this should be extracted from this component
                 // add commas to the amount
-                total = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                total = utils.numberFormat(total);
 
                 let parts = total.split('.');
                 let formatted = '';
@@ -286,6 +359,12 @@
                 } else {
                     return isHeader ? 'text-gray-600' : 'text-gray-900';
                 }
+            },
+
+            importingTransactions(records, importing = true) {
+                this.showingImportTransactionsModal = false;
+                this.importingInProgress = importing;
+                this.importingRecordsCount = records;
             }
         }
     }
