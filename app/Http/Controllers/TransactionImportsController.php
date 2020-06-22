@@ -67,7 +67,7 @@ class TransactionImportsController extends Controller
                     'finished_at' => now(),
                 ]);
 
-                event(new TransactionImportsUpdated($transactionImport));
+                event(new TransactionImportsUpdated($transactionImport->user_id));
             }
         } finally {
             fclose($fp);
