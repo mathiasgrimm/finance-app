@@ -43,7 +43,7 @@ class ProcessCsvImport implements ShouldQueue
     public function handle(Importer $importer)
     {
         event(new TransactionImportsUpdated($this->transactionImport->user_id));
-        sleep(15);
+        // sleep(10);
 
         try {
             $importer->import($this->transactionImport);
